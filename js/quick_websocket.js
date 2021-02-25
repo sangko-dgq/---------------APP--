@@ -13,6 +13,7 @@ var json_login =' {"M":"checkin","ID":"'+ ID +'","K":"'+ apikey +'"}';
 
 var me_console = document.getElementById("me_console");//调试窗
 var cirle_state = document.getElementById("cirle_state"); //状态球
+var closeConnection  = document.getElementById("closeConnection"); //关闭连接按钮
 
 //脚本监听
 var btn_quickConnect = document.getElementById("btn_quickConnect");
@@ -22,12 +23,14 @@ btn_quickConnect.addEventListener("click", function() {
 	console.log("服务器地址为：" + url);	
 	console.log("登录json为:" + json_login);
 	
-	// 1. Connect+Login
+	// 调用主模块
 	ConnectAndLoginWebsocket(url);
-
 });
 
-//create websocket
+
+
+
+/***********************************主模块封装***********************************/
 function ConnectAndLoginWebsocket(url) 
 {
 /*********连接ws**********************************************/
@@ -45,34 +48,49 @@ function ConnectAndLoginWebsocket(url)
 		var received_msg = evt.data;
 		me_console.innerText = received_msg;
 		console.log(received_msg);
-		
-        ws.send('{"M":"status"}');
-		if(received_msg = {"M":"connected"})
-		{
-			console.log(received_msg);
-		}
 /*********登录ws上创建的设备**********************************************/
-		//发送json登录指令
-		//{"M":"checkin","ID":"xx1","K":"xx2"}	
+		//发送json查询状态(在服务器返回结果中：connected代表已连接服务器尚未登录，checked代表已连接且登录成功)
+		ws.send('{"M":"status"}');
+		
+		//如果连接成功
 		if(received_msg = {"M":"connected"})
 		{
+			console.log("连接成功：" +  '{"M":"connected"}');
 			ws.send(json_login);
-			//查询连接登录状态(在服务器返回结果中：connected代表已连接服务器尚未登录，checked代表已连接且登录成功)
-			ws.send('{"M":"status"}');
-			//登录成功
+			//如果登录成功
 			if(received_msg = {"M":"checked"})
 			{
-				console.log(received_msg);
+				console.log("登录成功:"+  '{"M":"checked"}');
 				SetCirleState_teal();
+				
 /*****************************检测到登录成功后，连接数据模块***************************/
                 Hand_fanSpeed_range(ws); // 手动滑块控制风机速度模块
-                
+				
+			}else
+			{
+				SetCirleState_teal();
 			}
+		}else
+		{
+			SetCirleState_teal();
 		}
 	};
+	
+	//手动点击右上角icon关闭连接
+	closeConnection.addEventListener("click",function()
+	{
+		ws.close();
+		ws.onclose = function()
+		{
+			mui.toast("Break Connection!");
+			SetCirleState_red();
+			me_console.innerText = "Disconnected.....";
+		}
+	});
 }
 
-/*************************************模块封装*******************************************/
+
+/*************************************子模块封装*******************************************/
 
 /**********************************网络状态检测模块封装**************************************/
 	 // 通信状态实时检测（不包含登录检测）
@@ -97,7 +115,8 @@ function ConnectAndLoginWebsocket(url)
 	 			break;
 	 	}
 	 }
-
+	 
+    
 /**********************************UI动态模块封装*******************************************/
 	 // setInterval(Check_broken_cirleState, 10000); //利用该函数可以反复执行,10s
 	 function SetCirleState_red()    //未连接或未登录，状态球变为红色
@@ -105,14 +124,17 @@ function ConnectAndLoginWebsocket(url)
 			// console.log("Nothing sent within 1min,Connection is Broken!"); 
 			// me_console.innerText = "Nothing sent within 1min,Connection is Broken!";
 			cirle_state.className = "ui red right floated header";
+			closeConnection.className = "ui hidden content";
 	 }
 	 function SetCirleState_teal()   //已连接且已登录，状态球变为绿茶色
 	 {
 		 cirle_state.className = "ui teal right floated header";
+		 //显示关闭按钮
+		 closeConnection.className = "ui power off icon";
 	 }
 	 
  /**********************************数据模块封装*******************************************/
-	 //风机滑块手动调速模块
+	 //------------风机滑块手动调速模块
      function Hand_fanSpeed_range(ws)
 	 {
 		 var fanSpeed_range = document.getElementById("fanSpeed_range");
@@ -124,4 +146,5 @@ function ConnectAndLoginWebsocket(url)
 		 	ws.send(json_rangeToSend);
 		 });	
 	 }
-	 	
+	 
+	

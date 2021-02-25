@@ -51,14 +51,17 @@
 				});
 			</script>
 			<!-- 连接+登录状态（默认为红色，当连接和登录都成功才变成绿色（将red改为green或teal）） -->
-			<i id = "cirle_state" class="ui red right floated header"><i class="ui circle icon"></i></i>
-		
+			<i id = "cirle_state" class="ui red right floated header">
+				<i class="ui circle icon"></i>
+				<i id="closeConnection" class="hidden content"></i>
+			</i>
+		    
 		</div>
 		
 		<!-- Console调试窗: 按键监听，json消息 -->
         <div class="ui mini compack floating message" >
 			  <i class="inbox icon"></i>
-               <i style="color: #CE3C39;"><strong  id = "me_console" >Console.....</strong></i>
+               <i style="color: #CE3C39;"><strong  id = "me_console" >Disconnected.....</strong></i>
         </div>
 		<!-- view01 -->
 		<!-- -------------------------------------------------------------------- -->
