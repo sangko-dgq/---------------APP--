@@ -15,6 +15,12 @@ var me_console = document.getElementById("me_console");//调试窗
 var cirle_state = document.getElementById("cirle_state"); //状态球
 var closeConnection  = document.getElementById("closeConnection"); //关闭连接按钮
 
+
+//会自动在调用的时候，会刷新变量。就不能累次push追加了。所有应该放在全局作用域上
+var Re_TP_value;
+var Arr_TP_value = [];
+
+		
 //脚本监听
 var btn_quickConnect = document.getElementById("btn_quickConnect");
 btn_quickConnect.addEventListener("click", function() {
@@ -38,7 +44,6 @@ function ConnectAndLoginWebsocket(url)
 	ws.onopen = function() 
 	{
 		// console.log("Connected!");
-		me_console.innerText = "Connected!";
 	    Check_ws_state(ws);//通信检测
 		
 	};
@@ -46,8 +51,24 @@ function ConnectAndLoginWebsocket(url)
 	ws.onmessage = function(evt)
 	{
 		var received_msg = evt.data;
+		
+		//接收数据
+		var obj = JSON.parse(received_msg);
 		me_console.innerText = received_msg;
 		console.log(received_msg);
+		var obj = JSON.parse(received_msg);
+		if(obj.M == "say")
+		{
+			Re_TP_value = parseFloat(obj.C); //转换为浮点number
+			console.log(Re_TP_value);
+			
+			TP_value = Re_TP_value;
+			
+			//通过风机滑块监听测试温度数值是否实时传入
+			// fanSpeed_range.value = Re_TP_value;
+			// fanSpeed_text.innerText =  Re_TP_value;
+			
+		}
 /*********登录ws上创建的设备**********************************************/
 		//发送json查询状态(在服务器返回结果中：connected代表已连接服务器尚未登录，checked代表已连接且登录成功)
 		ws.send('{"M":"status"}');
@@ -55,16 +76,33 @@ function ConnectAndLoginWebsocket(url)
 		//如果连接成功
 		if(received_msg = {"M":"connected"})
 		{
-			console.log("连接成功：" +  '{"M":"connected"}');
+			// console.log("连接成功：" +  '{"M":"connected"}');
 			ws.send(json_login);
 			//如果登录成功
 			if(received_msg = {"M":"checked"})
 			{
-				console.log("登录成功:"+  '{"M":"checked"}');
+				console.log("登录成功");
 				SetCirleState_teal();
-				
+/*****************************检测到登录成功后，自动切换页面***************************/
+                    // 隐藏connect页面,显示Home页面
+					var view01 = document.getElementById("view01");
+					var view02 = document.getElementById("view02");
+					view01.style.display = "none";
+					view02.style.display = "block";
+                    
+					//禁用Home按钮
+					btn_home.className = " ui disable button";
+					//开启connect按钮
+					btn_connect.className = " ui positive button";
+
+/************************************************************************************/
+/*****************************弹出确认欢迎框***************************/
+				     // mui.alert(ID, "welcome!" );
+/*********************************************************************/
 /*****************************检测到登录成功后，连接数据模块***************************/
                 Hand_fanSpeed_range(ws); // 手动滑块控制风机速度模块
+				
+				ShowTemp(Re_TP_value);
 				
 			}else
 			{
@@ -86,6 +124,17 @@ function ConnectAndLoginWebsocket(url)
 			SetCirleState_red();
 			me_console.innerText = "Disconnected.....";
 		}
+		/*****************************检测到关闭连接后后，自动切换回connect页面***************************/
+		// 显示connect页面,隐藏Home页面
+		var view01 = document.getElementById("view01");
+		var view02 = document.getElementById("view02");
+		view01.style.display = "block";
+		view02.style.display = "none";
+		
+		//开启Home按钮
+		btn_home.className = " ui positive button";
+		//禁用connect按钮
+		btn_connect.className = " ui disable button";
 	});
 }
 
@@ -93,7 +142,7 @@ function ConnectAndLoginWebsocket(url)
 /*************************************子模块封装*******************************************/
 
 /**********************************网络状态检测模块封装**************************************/
-	 // 通信状态实时检测（不包含登录检测）
+	 // 通信连接状态实时检测（不包含登录检测）
 	 function Check_ws_state(ws)
 	 {
 	 	var ws_state = ws.readyState;
@@ -144,7 +193,146 @@ function ConnectAndLoginWebsocket(url)
 		 	//注意不能直接将该条放在监听外面，他会默认等于value的默认值
 		 	var json_rangeToSend = '{"M":"say","ID":"'+userID+'","C":"'+fanSpeed_range.value+'","SIGN":"xx3"}';
 		 	ws.send(json_rangeToSend);
+			
+			ws.onmessage = function(evt){
+				console.log(evt.data);
+				//接收从服务端发来的消息监听
+				me_console.innerText = received_msg;
+			}
+			
 		 });	
 	 }
 	 
+	
+	
+	
+
+	/*********************************************封装温度模块 ********************************************/
+	function ShowTemp(Re_TP_value)
+	{
+		console.log("Realtime Temperture"+ Re_TP_value); 
+		//创建温度数组 
+		/*********************************************************/
+		//第一次push得到的数组，给第二次push。。。，循环12次，从头再来
+		//注意追加后arr2 为number 新数组的长度，而arr1变成了新数组。我们应使用arr1
+		// console.log(arr2);// 4
+			if(Re_TP_value) //如果不为空 即有服务器数value更新
+			{
+				
+				//会自动在调用的时候，会刷新变量。就不能累次push追加了。所有应该放在全局作用域上
+				// var Arr_TP_value = [];
+				// var arr_m = [];
+				
+				Arr_TP_value.push(Re_TP_value);
+				console.log(Arr_TP_value);
+				// console.log(typeof(Re_TP_value));
+				// console.log(typeof(Arr_TP_value));	
+			}
+			//满12个元素后便清空数组,以保证重新push
+			if(Arr_TP_value.length >= 12)
+			{
+				Arr_TP_value.splice(0,Arr_TP_value.length);//满12个元素后便清空数组
+			}
+			/*********************************************************/
+		
+		// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
+		
+		var chartDom = document.getElementById('temp_DOM');
+		var myChart = echarts.init(chartDom, 'dark');
+		var option;
+		
+		var colors = ['#5470C6', '#EE6666'];
+		
+		option = {
+		    color: colors,
+		    tooltip: {
+		        trigger: 'none',
+		        axisPointer: {
+		            type: 'cross'
+		        }
+		    },
+		    legend: {
+		        data:['Temperature', 'Humidity']
+		    },
+		    grid: {
+		        top: 70,
+		        bottom: 50
+		    },
+		    xAxis: [
+		        {
+		            type: 'category',
+		            axisTick: {
+		                alignWithLabel: true
+		            },
+		            axisLine: {
+		                onZero: false,
+		                lineStyle: {
+		                    color: colors[1]
+		                }
+		            },
+		            axisPointer: {
+		                label: {
+		                    formatter: function (params) {
+		                        return 'value  ' + params.value
+		                            + (params.seriesData.length ? '：' + params.seriesData[0].data : '');
+		                    }
+		                }
+		            },
+		            data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		        },
+		        {
+		            type: 'category',
+		            axisTick: {
+		                alignWithLabel: true
+		            },
+		            axisLine: {
+		                onZero: false,
+		                lineStyle: {
+		                    color: colors[0]
+		                }
+		            },
+		            axisPointer: {
+		                label: {
+		                    formatter: function (params) {
+		                        return 'value  ' + params.value
+		                            + (params.seriesData.length ? '：' + params.seriesData[0].data : '');
+		                    }
+		                }
+		            },
+		            data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		        }
+		    ],
+		    yAxis: [
+		        {
+		            type: 'value'
+		        }
+		    ],
+		    series: [
+		        {
+		            name: 'Temperature',
+		            type: 'line',
+		            xAxisIndex: 1,
+		            smooth: true,
+		            emphasis: {
+		                focus: 'series'
+		            },
+		            data: Arr_TP_value
+		        },
+		        {
+		            name: 'Humidity',
+		            type: 'line',
+		            smooth: true,
+		            emphasis: {
+		                focus: 'series'
+		            },
+		            data: [3.9, 5.9, 11.1, 18.7, 48.3, 69.2, 231.6, 46.6, 55.4, 18.4, 10.3, 0.7]
+		        }
+		    ]
+		};
+		
+		option && myChart.setOption(option);
+
+		
+	}
+								
 	
