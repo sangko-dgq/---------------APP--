@@ -57,7 +57,10 @@ function ConnectAndLoginWebsocket(url)
 		me_console.innerText = received_msg;
 		console.log(received_msg);
 		var obj = JSON.parse(received_msg);
-		if(obj.M == "say")
+		
+		/**************************************接收温度接口的数据*********************************/
+		//U14887为sangko(web),这里以后应设置应限制为温度接口相关条件
+		if(obj.M == "say"  && obj.ID == "U14887")
 		{
 			Re_TP_value = parseFloat(obj.C); //转换为浮点number
 			console.log(Re_TP_value);
@@ -66,9 +69,10 @@ function ConnectAndLoginWebsocket(url)
 			
 			//通过风机滑块监听测试温度数值是否实时传入
 			// fanSpeed_range.value = Re_TP_value;
-			// fanSpeed_text.innerText =  Re_TP_value;
-			
+			// fanSpeed_text.innerText =  Re_TP_value;		
 		}
+		
+/******************************************************************************/
 /*********登录ws上创建的设备**********************************************/
 		//发送json查询状态(在服务器返回结果中：connected代表已连接服务器尚未登录，checked代表已连接且登录成功)
 		ws.send('{"M":"status"}');
@@ -96,6 +100,13 @@ function ConnectAndLoginWebsocket(url)
 					btn_connect.className = " ui positive button";
 
 /************************************************************************************/
+
+/************************Test（登录成功才能发送到设备，否则无效代码）*****************************/
+		    // Test_send_to_Temp_Interface(ws);
+		/*********************************************************/
+
+
+
 /*****************************弹出确认欢迎框***************************/
 				     // mui.alert(ID, "welcome!" );
 /*********************************************************************/
@@ -210,7 +221,7 @@ function ConnectAndLoginWebsocket(url)
 	/*********************************************封装温度模块 ********************************************/
 	function ShowTemp(Re_TP_value)
 	{
-		console.log("Realtime Temperture"+ Re_TP_value); 
+		console.log("Realtime Temperture" + Re_TP_value); 
 		//创建温度数组 
 		/*********************************************************/
 		//第一次push得到的数组，给第二次push。。。，循环12次，从头再来
@@ -334,5 +345,29 @@ function ConnectAndLoginWebsocket(url)
 
 		
 	}
-								
+	/******************************************************************************************************/							
 	
+	
+	/********************************************测试模拟模块**************************************************/
+	//1  模拟温度传感器向 服务器UID的设备下的温度接口发送数据
+	    // {"M":"update","ID":"xx1","V":{"id1":"value1",...}}   虚拟设备ID下面的接口id
+		
+		//ID = 20959; 温度id1 = 19017
+	// 	var id_temp = "19017";
+	// function Test_send_to_Temp_Interface(ws)
+	// {
+	// 	// ws.send(' {"M":"update","ID":'+ ID +',"V":{' + id1 + ':"23"}} ');
+	// 	ws.send(' {"M":"update","ID":'+ ID +',"V":{' +id_temp+':'+ Re_TP_value +'}} ');
+	// 	console.log("向接口发送温度");
+	// 	var json2 = '{' +id_temp+':'+ Re_TP_value +'}';
+		
+	// 	console.log(' {"M":"update","ID":'+ ID +',"V": '+ json2+'} ');
+		
+	// 	ws.send(' {"M":"update","ID":'+ ID +',"V":{"19017":'+ Re_TP_value +'}} ');
+	// 	console.log("向接口发送温度");
+		
+	// }
+		
+		
+	
+	/********************************************************************************************************/
