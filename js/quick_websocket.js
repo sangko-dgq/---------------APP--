@@ -6,6 +6,7 @@ var ID = "20959";
 var apikey = "6d2ac0601";
 
 var userID = "U14887";
+var arduinoID = "D21129";
 
 var url = site + ":" + port;
 var json_login =' {"M":"checkin","ID":"'+ ID +'","K":"'+ apikey +'"}';
@@ -112,6 +113,7 @@ function ConnectAndLoginWebsocket(url)
 /*********************************************************************/
 /*****************************检测到登录成功后，连接数据模块***************************/
                 Hand_fanSpeed_range(ws); // 手动滑块控制风机速度模块
+				Hand_Or_Auto(ws); //风机手自动切换模块
 				
 				ShowTemp(Re_TP_value);
 				
@@ -193,31 +195,51 @@ function ConnectAndLoginWebsocket(url)
 		 closeConnection.className = "ui power off icon";
 	 }
 	 
- /**********************************数据模块封装*******************************************/
-	 //------------风机滑块手动调速模块
+ /**********************************封装风机手动滑块调速模块*******************************************/
      function Hand_fanSpeed_range(ws)
 	 {
 		 var fanSpeed_range = document.getElementById("fanSpeed_range");
 		 //滑动条滑动监听
 		 fanSpeed_range.addEventListener("touchmove", function()
 		 {
+			 //向ArduinoID发送动态滑块值
 		 	//注意不能直接将该条放在监听外面，他会默认等于value的默认值
-		 	var json_rangeToSend = '{"M":"say","ID":"'+userID+'","C":"'+fanSpeed_range.value+'","SIGN":"xx3"}';
+		 	var json_rangeToSend = '{"M":"say","ID":"'+arduinoID+'","C":"'+fanSpeed_range.value+'","SIGN":"xx3"}';
 		 	ws.send(json_rangeToSend);
 			
 			ws.onmessage = function(evt){
 				console.log(evt.data);
 				//接收从服务端发来的消息监听
-				me_console.innerText = received_msg;
+				me_console.innerText = evt.data;
 			}
 			
 		 });	
 	 }
 	 
+	/**********************************封装风机手自动切换模块*******************************************/
+	function Hand_Or_Auto(ws)
+	{
+		var btn_autoFan = document.getElementById("btn_autoFan");
+		var json_rangeToSend;
+		btn_autoFan.addEventListener("toggle", function(event) {
+			if (event.detail.isActive) {
+				mui.toast("Auto-fan is open!");
+				//向ArduinoID发送"Auto-fan is open!"
+				 json_rangeToSend = '{"M":"say","ID":"'+arduinoID+'","C":"OpenAuto_fan!","SIGN":"xx3"}';
+			} else {
+				mui.toast("Auto-fan is close!");
+				//向ArduinoID发送"Auto-fan is close!"
+				json_rangeToSend = '{"M":"say","ID":"'+arduinoID+'","C":"CloseAuto_fan!","SIGN":"xx3"}';
+			}
+			if(json_rangeToSend) //如果不为空才发送，默认为空
+			{
+				ws.send(json_rangeToSend);
+				console.log(json_rangeToSend);
+			}
+		})
+		
+	}
 	
-	
-	
-
 	/*********************************************封装温度模块 ********************************************/
 	function ShowTemp(Re_TP_value)
 	{
