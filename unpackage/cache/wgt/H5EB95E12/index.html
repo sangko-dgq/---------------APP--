@@ -1,0 +1,314 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+
+		<!-- mui----->
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+		</script>
+		<!----------->
+		<script src="echarts.min.js"></script>
+		<!-- 引入 echarts 主题 -->
+		<script src="theme/dark.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+		<link rel="stylesheet" type="text/css" href="css/me.css" />
+
+		<!-- 毛玻璃 -->
+		<link rel="stylesheet" type="text/css" href="css/glassMorphism.css" />
+		<!-- 新拟态 -->
+		<link rel="stylesheet" type="text/css" href="css/neumorphism.css" />
+	</head>
+
+	<body>
+
+		<!--------------------common tab bar------------------------------------------->
+		<div class="ui top fixed menu">
+			<div class="ui attached inverted segment">
+				<div class="ui buttons">
+					<button class="ui disable button" id="btn_connect"><i class="ui rss icon"></i></button>
+					<div class="or" data-text=">"></div>
+					<button class="ui positive button" id="btn_home">
+						<i class="ui large mixcloud icon"></i>
+					</button>
+				</div>
+				<!-- click connect -->
+				<script type="text/javascript">
+					var btn_home = document.getElementById("btn_home");
+					btn_home.addEventListener("click", function() {
+						// 隐藏connect页面,显示Home页面
+						var view01 = document.getElementById("view01");
+						var view02 = document.getElementById("view02");
+						view01.style.display = "none";
+						view02.style.display = "block";
+
+						//禁用Home按钮
+						btn_home.className = " ui disable button";
+						//开启connect按钮
+						btn_connect.className = " ui positive button";
+					});
+				</script>
+				<!--click  Home -->
+				<script type="text/javascript">
+					var btn_connect = document.getElementById("btn_connect");
+					btn_connect.addEventListener("click", function() {
+						// 显示connect页面,隐藏Home页面
+						var view01 = document.getElementById("view01");
+						var view02 = document.getElementById("view02");
+						view01.style.display = "block";
+						view02.style.display = "none";
+
+						//开启Home按钮
+						btn_home.className = " ui positive button";
+						//禁用connect按钮
+						btn_connect.className = " ui disable button";
+					});
+				</script>
+				<!-- 连接+登录状态（默认为红色，当连接和登录都成功才变成绿色（将red改为green或teal）） -->
+				<i id="cirle_state" class="ui red right floated header">
+					<i class="ui circle icon"></i>
+					<i id="closeConnection" class="hidden content"></i>
+				</i>
+
+			</div>
+		</div>
+		<!-- 站位  因为给top bar 设置了fixed ，不占位，下面的调试窗就会自动浮上去！ -->
+		<div class="ui attached inverted segment">
+			<br>
+			<br>
+		</div>
+		<!-- ------------------------------------------------------------- -->
+
+		<!-- 侧滑导航根容器 -->
+		<div class="mui-off-canvas-wrap mui-draggable">
+			<!-- 菜单容器 -->
+			<aside class="mui-off-canvas-left">
+				<div class="mui-scroll-wrapper">
+					<div class="mui-scroll">
+						<!-- 侧滑菜单内容 -->
+
+						<ul class="mui-table-view">
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
+									<i class="ui code branch icon"></i>
+									Devlog
+								</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
+									<i class="ui copyright outline icon"></i>
+									Software statement
+								</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
+									<i class="ui info icon"></i>
+									About
+								</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
+									<i class="ui github icon"></i>
+									Star on GitHub
+								</a>
+							</li>
+						</ul>
+
+						<div class="ui container">
+							<div class="ui teal segment">
+								<iframe width="80%" scrolling="no" height="150px" frameborder="2px" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&icon=2&py=chengdu&temp=1&num=7&site=12"></iframe>
+							</div>
+							
+						</div>
+						
+					</div>
+				</div>
+			</aside>
+
+
+			<!-- 主页面容器 -->
+			<div class="mui-inner-wrap">
+				<!-- 主页面标题 -->
+				<header class="mui-bar mui-bar-nav">
+					<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>
+
+					<!-- Console调试窗: 按键监听，json消息 -->
+					<div class="ui mini compack floating message" style="width: 90%;  float: right;  margin-top: 2px;">
+						<i class="terminal icon"></i>
+						<i style="color: #CE3C39;"><strong id="me_console">Disconnected.....</strong></i>
+					</div>
+
+				</header>
+				<div class="mui-content mui-scroll-wrapper">
+					<div class="mui-scroll">
+
+
+						<!-- 主界面 -->
+						<!-- view01 -->
+						<!-- -------------------------------------------------------------------- -->
+						<div class="view" id="view01" style="display:block;">
+							<!-- 容器-连接页面-->
+							<!-- <div class="ui container"> -->
+							<div class="ui placeholder segment">
+								<!-- ------------------url-------------------------------->
+								<div class="ui four column very relaxed stackable grid">
+									<div class="column">
+										<div class="ui form">
+											<div class="field">
+												<label>url</label>
+												<div class="ui left icon input">
+													<input type="text" placeholder="http/ws://...">
+													<i class="like icon"></i>
+												</div>
+											</div>
+											<div class="field">
+												<label>Port</label>
+												<div class="ui left icon input">
+													<input type="password" placeholder="8xxx">
+													<i class="road icon"></i>
+												</div>
+											</div>
+											<div class="ui blue submit button">Connect</div>
+										</div>
+									</div>
+									<!-- -------------------以填写变量的方式登录 -------------->
+									<div class="column">
+										<div class="ui form">
+											<div class="field">
+												<label>ID</label>
+												<div class="ui left icon input">
+													<input type="text" placeholder="Device ID">
+													<i class="user icon"></i>
+												</div>
+											</div>
+											<div class="field">
+												<label>apiKey</label>
+												<div class="ui left icon input">
+													<input type="password">
+													<i class="lock icon"></i>
+												</div>
+											</div>
+											<div class="ui blue submit button">Login</div>
+										</div>
+									</div>
+									<!-- -------------------以发送json的方式快速登录 -------------->
+									<div class="ui horizontal divider">
+										Or
+									</div>
+									<div class="middle aligned column">
+										<div class="ui big button" id="btn_quickConnect">
+											<i class="code icon"></i>
+											Quick Connect
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+
+						<!-- ----------------------------------------------------------------------------------------------- -->
+						<!-- --------------------------------------view02 ------------------------------------------------------------------->
+
+						<div id="view02" style="display:none;">
+							<!-- ----------------------------------Fan------------------------------- -->
+							<div id="fan_view" class="ui container" style="margin-top: 10px;">
+								<!--Open or Close “auto fan” -->
+								<div class="neumorphism" style=" width: 100%; ">
+									<div class="mui-input-row">
+										<label id="auto_switch_label" style="width: 60%;"><i class="ui circular inverted teal life ring icon"></i>
+											auto
+											<div class="mui-switch" id="btn_autoFan" style="margin-top: 0;">
+												<div class="mui-switch-handle"></div><!-- id="btn_autoFan"不能写在开关内层，应写在外层整体壳上 -->
+											</div>
+										</label>
+
+										<label id="fan_speed_text_lable" class="neumorphism" style="width: 25%; margin-left: 20px;">
+											<h2 id="fanSpeed_text" class="ui teal header" style="margin-left: auto;">0</h2>
+										</label>
+									</div>
+
+
+
+									<!-- ------------------------------------------------------------------- -->
+									<!-- 手动模式：风机速度调节设置和监听时间-->
+									<div class=" mui-input-row  neumorphism" id="range_lable" style="margin-top: 8px;">
+										<div class="mui-input-row mui-input-range">
+											<input id="fanSpeed_range" style="margin-left: 18px;" type="range" min="0" max="1023" value="0">
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<script type="text/javascript">
+								var fanSpeed_range = document.getElementById("fanSpeed_range");
+								var fanSpeed_text = document.getElementById("fanSpeed_text");
+								//滑动条滑动监听
+								fanSpeed_range.addEventListener("touchmove", function() {
+									//注意不能直接将该条放在监听外面，他会默认等于value的默认值
+									fanSpeed_text.innerText = fanSpeed_range.value;
+
+									//存储到本地
+									// localStorage.setItem("fanSpeed_range.value", fanSpeed_range.value);
+								});
+							</script>
+
+
+
+							<!-- --------------------------------------------------------------- -->
+
+
+
+
+							<!-- 数据选项 -->
+							<div class="ui horizontal divider">
+								<i class="ui jsfiddle icon"></i>
+							</div>
+							<div class="ui attached buttons">
+								<button class="ui button">Temp</button>
+								<button class="ui button">RH</button>
+								<button class="ui button">PM2.5</button>
+								<button class="ui button">CO2</button>
+							</div>
+
+
+
+
+							<!---------------------------温度数据显示面板------------------------ -->
+							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+							<div id="temp_DOM" style="width: 400px;height:400px;"></div>
+
+							<!-------------------------------------------------------------- -->
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-----------------------scripts---------------------------------------->
+		<script src="./js/quick_websocket.js"></script>
+		<!--------------------------------------------------scripts src--------------------------------------->
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+		<script src="js/mui.js"></script>
+		<script src="js/mui.min.js"></script>
+
+
+		<script src="js/mui.js"></script>
+		<script src="js/mui.js"></script>
+		<script src="js/mui.min.js"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+
+
+	</body>
+
+</html>
