@@ -19,6 +19,10 @@
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
 		<link rel="stylesheet" type="text/css" href="css/me.css" />
 
+		<!-- 毛玻璃 -->
+		<link rel="stylesheet" type="text/css" href="css/glassMorphism.css" />
+		<!-- 新拟态 -->
+		<link rel="stylesheet" type="text/css" href="css/neumorphism.css" />
 	</head>
 
 	<body>
@@ -87,34 +91,41 @@
 				<div class="mui-scroll-wrapper">
 					<div class="mui-scroll">
 						<!-- 侧滑菜单内容 -->
-						
+
 						<ul class="mui-table-view">
-						    <li class="mui-table-view-cell">
-						        <a class="mui-navigate-right">
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
 									<i class="ui code branch icon"></i>
 									Devlog
-									</a>
-						    </li>
-						    <li class="mui-table-view-cell">
-						        <a class="mui-navigate-right">
-									<i class="ui copyright outline icon"></i>
-								Software statement
 								</a>
-						    </li>
-						    <li class="mui-table-view-cell">
-						        <a class="mui-navigate-right">
+							</li>
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
+									<i class="ui copyright outline icon"></i>
+									Software statement
+								</a>
+							</li>
+							<li class="mui-table-view-cell">
+								<a class="mui-navigate-right">
 									<i class="ui info icon"></i>
 									About
 								</a>
-						    </li>
+							</li>
 							<li class="mui-table-view-cell">
-							    <a class="mui-navigate-right">
+								<a class="mui-navigate-right">
 									<i class="ui github icon"></i>
 									Star on GitHub
-									</a>
+								</a>
 							</li>
 						</ul>
-						
+
+						<div>
+							<!-- 网络天气 -->
+						</div>
+						<div class="ui teal segment">
+							<iframe width="80%" scrolling="no" height="150px" frameborder="2px" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&icon=2&py=chengdu&temp=1&num=7&site=12"></iframe>
+						</div>
+
 					</div>
 				</div>
 			</aside>
@@ -125,18 +136,18 @@
 				<!-- 主页面标题 -->
 				<header class="mui-bar mui-bar-nav">
 					<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>
-					
-                          <!-- Console调试窗: 按键监听，json消息 -->
-                          <div class="ui mini compack floating message"  style="width: 90%;  float: right;  margin-top: 2px;">
-                          	<i class="terminal icon"></i>
-                          	<i style="color: #CE3C39;"><strong id="me_console">Disconnected.....</strong></i>
-                          </div>
-					
+
+					<!-- Console调试窗: 按键监听，json消息 -->
+					<div class="ui mini compack floating message" style="width: 90%;  float: right;  margin-top: 2px;">
+						<i class="terminal icon"></i>
+						<i style="color: #CE3C39;"><strong id="me_console">Disconnected.....</strong></i>
+					</div>
+
 				</header>
 				<div class="mui-content mui-scroll-wrapper">
 					<div class="mui-scroll">
-						
-						
+
+
 						<!-- 主界面 -->
 						<!-- view01 -->
 						<!-- -------------------------------------------------------------------- -->
@@ -197,32 +208,43 @@
 									</div>
 								</div>
 							</div>
-							</div>
-							
+						</div>
+
 
 
 						<!-- ----------------------------------------------------------------------------------------------- -->
 						<!-- --------------------------------------view02 ------------------------------------------------------------------->
 
 						<div id="view02" style="display:none;">
-							<!--Open or Close “auto fan” -->
-							<div class="ui inverted attached segment">
-								<div class="mui-input-row">
-									<label>Auto Fan</label>
-									<div class="mui-switch" id="btn_autoFan">
-										<div class="mui-switch-handle"></div><!-- id="btn_autoFan"不能写在开关内层，应写在外层整体壳上 -->
+							<!-- ----------------------------------Fan------------------------------- -->
+							<div id="fan_view" class="ui container" style="margin-top: 10px;">
+								<!--Open or Close “auto fan” -->
+								<div class="neumorphism" style=" width: 100%; ">
+									<div class="mui-input-row">
+										<label id="auto_switch_label" style="width: 60%;"><i class="ui circular inverted teal life ring icon"></i>
+											auto
+											<div class="mui-switch" id="btn_autoFan" style="margin-top: 0;">
+												<div class="mui-switch-handle"></div><!-- id="btn_autoFan"不能写在开关内层，应写在外层整体壳上 -->
+										    </div>
+										</label>
+										
+										<label id="fan_speed_text_lable" class="neumorphism"  style="width: 25%; margin-left: 20px;">
+											<h2 id="fanSpeed_text" class="ui teal header" style="margin-left: auto;">0</h2>
+										</label>
 									</div>
-								</div>
+
+								
 
 								<!-- ------------------------------------------------------------------- -->
-								<!-- 风机速度调节设置和监听时间-->
-								<div class=" mui-input-row">
+								<!-- 手动模式：风机速度调节设置和监听时间-->
+								<div class=" mui-input-row  neumorphism"  id="range_lable"  style="margin-top: 8px;">
 									<div class="mui-input-row mui-input-range">
-										<label>Fan Speed</label>
-										<input id="fanSpeed_range" type="range" min="0" max="1023" value="0">
-										<i id="fanSpeed_text">0</i>
+										<input id="fanSpeed_range" style="margin-left: 18px;" type="range" min="0" max="1023" value="0">
 									</div>
 								</div>
+                                </div>
+								</div>
+
 								<script type="text/javascript">
 									var fanSpeed_range = document.getElementById("fanSpeed_range");
 									var fanSpeed_text = document.getElementById("fanSpeed_text");
@@ -235,7 +257,8 @@
 										// localStorage.setItem("fanSpeed_range.value", fanSpeed_range.value);
 									});
 								</script>
-							</div>
+
+							
 
 							<!-- --------------------------------------------------------------- -->
 
@@ -244,7 +267,7 @@
 
 							<!-- 数据选项 -->
 							<div class="ui horizontal divider">
-								Data
+								<i class="ui jsfiddle icon"></i>
 							</div>
 							<div class="ui attached buttons">
 								<button class="ui button">Temp</button>
@@ -252,16 +275,16 @@
 								<button class="ui button">PM2.5</button>
 								<button class="ui button">CO2</button>
 							</div>
-							
-							
+
+
 
 
 							<!---------------------------温度数据显示面板------------------------ -->
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-							    <div id="temp_DOM" style="width: 400px;height:400px;"></div>
-			                     
+							<div id="temp_DOM" style="width: 400px;height:400px;"></div>
+
 							<!-------------------------------------------------------------- -->
-							
+
 						</div>
 					</div>
 				</div>
@@ -275,8 +298,8 @@
 		<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 		<script src="js/mui.js"></script>
 		<script src="js/mui.min.js"></script>
-								
-		
+
+
 		<script src="js/mui.js"></script>
 		<script src="js/mui.js"></script>
 		<script src="js/mui.min.js"></script>

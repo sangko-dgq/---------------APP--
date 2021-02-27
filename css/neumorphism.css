@@ -1,0 +1,20 @@
+.neumorphism {
+	border-radius: 10px;
+	background: #dbdbdb;
+	box-shadow: 8px 8px 21px #c3c3c3,
+		-8px -8px 21px #f3f3f3;
+}
+
+.neumorphism #auto_switch_label {
+	border-radius: 10px;
+	background: #e6e6e6;
+	box-shadow: inset 7px 7px 11px #dbdbdb,
+		inset -7px -7px 11px #f2f2f2;
+}
+
+.neumorphism #fan_speed_text_lable {
+	border-radius: 10px;
+	background: linear-gradient(145deg, #cfcfcf, #f6f6f6);
+	box-shadow: 7px 7px 24px #d8d8d8,
+		-7px -7px 24px #f4f4f4;
+}
