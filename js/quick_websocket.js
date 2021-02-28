@@ -138,7 +138,7 @@ function Hand_fanSpeed_range(ws) {
 	fanSpeed_range.addEventListener("touchmove", function() {
 		//向ArduinoID发送动态滑块值
 		//注意不能直接将该条放在监听外面，他会默认等于value的默认值
-		var json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"' + fanSpeed_range.value + '","SIGN":"xx3"}';
+		var json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"' + fanSpeed_range.value + '","SIGN":"fan_speed_hand_range"}';
 		ws.send(json_rangeToSend);
 
 		ws.onmessage = function(evt) {
@@ -158,11 +158,11 @@ function Hand_Or_Auto(ws) {
 		if (event.detail.isActive) {
 			mui.toast("Auto-fan is open!");
 			//向ArduinoID发送"Auto-fan is open!"
-			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"OpenAuto_fan!","SIGN":"xx3"}';
+			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"OpenAuto_fan!","SIGN":"fan_hand_auto"}';
 		} else {
 			mui.toast("Auto-fan is close!");
 			//向ArduinoID发送"Auto-fan is close!"
-			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"CloseAuto_fan!","SIGN":"xx3"}';
+			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"CloseAuto_fan!","SIGN":"fan_hand_auto"}';
 		}
 
 		if (json_rangeToSend) //如果不为空才发送，默认为空
