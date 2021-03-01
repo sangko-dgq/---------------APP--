@@ -8,6 +8,8 @@ var apikey = "6d2ac0601";
 var userID = "U14887";
 var arduinoID = "D21129";
 
+var user_apiID = "U14887";  //贝壳微信小程序里登录userID,可以模拟Arduino向APP发送实时数据等。（用不同SIGN的Range可以快速模拟温湿度发送指令）
+
 var url = site + ":" + port;
 var json_login = ' {"M":"checkin","ID":"' + ID + '","K":"' + apikey + '"}';
 
@@ -19,6 +21,11 @@ var closeConnection = document.getElementById("closeConnection"); //关闭连接
 
 //会自动在调用的时候，会刷新变量。就不能累次push追加了。所有应该放在全局作用域上
 var Arr_TP_value = [];
+var Arr_hum_value = [];
+var Arr_CO2_value = [];
+var Arr_dust_value = [];
+// var Arr_fan_value = [];
+
 
 
 //脚本监听
@@ -153,16 +160,26 @@ function Hand_fanSpeed_range(ws) {
 /**********************************封装风机手自动切换模块***********************/
 function Hand_Or_Auto(ws) {
 	var btn_autoFan = document.getElementById("btn_autoFan");
+	var range_lable = document.getElementById("range_lable");
 	var json_rangeToSend;
 	btn_autoFan.addEventListener("toggle", function(event) {
 		if (event.detail.isActive) {
 			mui.toast("Auto-fan is open!");
 			//向ArduinoID发送"Auto-fan is open!"
 			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"OpenAuto_fan!","SIGN":"fan_hand_auto"}';
+			
+			//隐藏手动Range
+			range_lable.style.display = "none";
+			
+			
 		} else {
 			mui.toast("Auto-fan is close!");
 			//向ArduinoID发送"Auto-fan is close!"
 			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"CloseAuto_fan!","SIGN":"fan_hand_auto"}';
+			
+			//显示手动Range
+			range_lable.style.display = "block";
+			
 		}
 
 		if (json_rangeToSend) //如果不为空才发送，默认为空
@@ -173,7 +190,8 @@ function Hand_Or_Auto(ws) {
 	});
 }
 
-/*********************************************封装温度模块 ******************************************************/
+//数据显示
+/*********************************************封装温湿度显示模块 ******************************************************/
 function ShowTemp(ws) {
 
 	ws.onmessage = function(evt) {
@@ -181,29 +199,44 @@ function ShowTemp(ws) {
 		me_console.innerText = evt.data;
 		console.log(evt.data);
 
-		if (obj.M == "say" && obj.ID == arduinoID) //由D21129（Arduino）发过来的
+		if (obj.M == "say" && obj.ID == arduinoID) //由D21129（Arduino）发过来的say
 		{
-			var Re_TP_value = parseFloat(obj.C); //转换为浮点number
-			console.log(Re_TP_value);
+			switch (obj.SIGN) {
+				case "hum":
+					var Re_hum_value = parseFloat(obj.C); //转换为浮点number
+		            Arr_hum_value.push(Re_hum_value);
+					break;
+			    case "temp":
+				    var Re_TP_value = parseFloat(obj.C);
+                    Arr_TP_value.push(Re_TP_value);
+				default:
+					break;
+			}
+
+			// if(obj.SIGN == "temp")
+			// {
+			// var Re_TP_value = parseFloat(obj.C); //转换为浮点number
+			// console.log("温度:" + Re_TP_value);
+			// }
+			
 		}
 		
-		//叠次push,创建温度数组 
-		Arr_TP_value.push(Re_TP_value);
-		console.log(Arr_TP_value);
-		console.log(typeof(Re_TP_value));
-		// console.log(typeof(Arr_TP_value));	
+	   
 
 		//满12个元素后便清空数组,以保证重新push
 		if (Arr_TP_value.length >= 12) {
 			Arr_TP_value.splice(0, Arr_TP_value.length);
 		}
-
-		creat_Temp_echarts(Arr_TP_value);
+		
+		
+		// Temp+Hum
+		creat_TempHum_echarts(Arr_TP_value,Arr_hum_value);	
 	}
 }
-/*******************************************绘制温度Echarts**********************************************/
 
-function creat_Temp_echarts(Arr_TP_value) {
+//Echarts
+/*******************************************绘制温湿度Echarts模块**********************************************/
+function creat_TempHum_echarts(Arr_TP_value,Arr_hum_value) {
 
 	// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
 
@@ -243,7 +276,7 @@ function creat_Temp_echarts(Arr_TP_value) {
 					label: {
 						formatter: function(params) {
 							return 'value  ' + params.value +
-								(params.seriesData.length ? '：' + params.seriesData[0].data : '');
+								(params.seriesData.length ? '：' + params.seriesData[0].data : '' + "°C");
 						}
 					}
 				},
@@ -264,7 +297,7 @@ function creat_Temp_echarts(Arr_TP_value) {
 					label: {
 						formatter: function(params) {
 							return 'value  ' + params.value +
-								(params.seriesData.length ? '：' + params.seriesData[0].data : '');
+								(params.seriesData.length ? '：' + params.seriesData[0].data : '' + "%");
 						}
 					}
 				},
@@ -282,7 +315,7 @@ function creat_Temp_echarts(Arr_TP_value) {
 				emphasis: {
 					focus: 'series'
 				},
-				data: Arr_TP_value
+				data: Arr_TP_value    //温度数组
 			},
 			{
 				name: 'Humidity',
@@ -291,9 +324,139 @@ function creat_Temp_echarts(Arr_TP_value) {
 				emphasis: {
 					focus: 'series'
 				},
-				data: [3.9, 5.9, 11.1, 18.7, 48.3, 69.2, 231.6, 46.6, 55.4, 18.4, 10.3, 0.7]
+				data: Arr_hum_value  //湿度数值
 			}
 		]
 	};
 	option && myChart.setOption(option);
 }
+
+/*******************************************绘制CO2浓度Echarts模块**********************************************/
+
+function creat_co2_echarts(Arr_CO2_value) {
+
+	// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
+
+	var chartDom = document.getElementById('CO2_DOM');
+	var myChart = echarts.init(chartDom, 'dark');
+	var option;
+
+	var colors = ['#ffaaff'];
+
+	option = {
+		color: colors,
+		tooltip: {
+			trigger: 'none',
+			axisPointer: {
+				type: 'cross'
+			}
+		},
+		legend: {
+			data: ['CO2']
+		},
+		grid: {
+			top: 70,
+			bottom: 50
+		},
+		xAxis: [{
+				type: 'category',
+				axisTick: {
+					alignWithLabel: true
+				},
+				axisLine: {
+					onZero: false,
+					lineStyle: {
+						color: colors[1]
+					}
+				},
+				axisPointer: {
+					label: {
+						formatter: function(params) {
+							return 'value  ' + params.value +
+								(params.seriesData.length ? '：' + params.seriesData[0].data : '' + "°C");
+						}
+					}
+				},
+				data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+			}],
+		yAxis: [{
+			type: 'value'
+		}],
+		series: [{
+				name: 'CO2',
+				type: 'line',
+				xAxisIndex: 1,
+				smooth: true,
+				emphasis: {
+					focus: 'series'
+				},
+				data: Arr_CO2_value    //温度数组
+			}]
+	};
+	option && myChart.setOption(option);
+}
+/*******************************************绘制灰尘浓度Echarts模块**********************************************/
+function creat_dust_echarts(Arr_dust_value) {
+
+	// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
+
+	var chartDom = document.getElementById('dust_DOM');
+	var myChart = echarts.init(chartDom, 'dark');
+	var option;
+
+	var colors = ['#55007f'];
+
+	option = {
+		color: colors,
+		tooltip: {
+			trigger: 'none',
+			axisPointer: {
+				type: 'cross'
+			}
+		},
+		legend: {
+			data: ['Dust']
+		},
+		grid: {
+			top: 70,
+			bottom: 50
+		},
+		xAxis: [{
+				type: 'category',
+				axisTick: {
+					alignWithLabel: true
+				},
+				axisLine: {
+					onZero: false,
+					lineStyle: {
+						color: colors[1]
+					}
+				},
+				axisPointer: {
+					label: {
+						formatter: function(params) {
+							return 'value  ' + params.value +
+								(params.seriesData.length ? '：' + params.seriesData[0].data : '' + "m2");
+						}
+					}
+				},
+				data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+			}],
+		yAxis: [{
+			type: 'value'
+		}],
+		series: [{
+				name: 'Dust',
+				type: 'line',
+				xAxisIndex: 1,
+				smooth: true,
+				emphasis: {
+					focus: 'series'
+				},
+				data: Arr_CO2_value    //温度数组
+			}]
+	};
+	option && myChart.setOption(option);
+}
+
+/*******************************************绘制fan speed监听Echarts模块**********************************************/

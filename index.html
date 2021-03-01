@@ -28,8 +28,7 @@
 		<link rel="stylesheet" type="text/css" href="css/neumorphism.css" />
 	</head>
 
-	<body>
-
+	<muibody>
 		<!--------------------common tab bar------------------------------------------->
 		<div class="ui top fixed menu">
 			<div class="ui attached inverted segment">
@@ -101,6 +100,26 @@
 									 Use Web Version
 								</a>
 							</li>
+							
+							<li class="mui-table-view-cell">
+							
+							
+							<div class="ui card">
+							  <div class="content">
+							    <div class="header"><i class="terminal icon"></i></div>
+							  </div>
+							   <!-- Console调试窗: 按键监听，json消息 -->
+							  <div class="content" id="me_console" style="word-wrap: break-word;word-break: break-all;overflow: hidden; font-size: smaller;"">
+							    <p >Disconnect.....</p>
+							  <div class="extra content">
+							    <button class="ui button">Join Project</button>
+							  </div>
+							</div>
+							
+							</div>
+							</li>
+							
+							
 							<li class="mui-table-view-cell">
 								<a class="mui-navigate-right">
 									<i class="ui code branch icon"></i>
@@ -125,14 +144,10 @@
 									Star on GitHub
 								</a>
 							</li>
-						</ul>
-
-						<div class="ui container">
-							<div class="ui teal segment">
-								<iframe width="80%" scrolling="no" height="150px" frameborder="2px" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&icon=2&py=chengdu&temp=1&num=7&site=12"></iframe>
-							</div>
 							
-						</div>
+							
+							
+						</ul>
 						
 					</div>
 				</div>
@@ -145,11 +160,7 @@
 				<header class="mui-bar mui-bar-nav">
 					<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>
 
-					<!-- Console调试窗: 按键监听，json消息 -->
-					<div class="ui mini compack floating message" style="width: 90%;  float: right;  margin-top: 2px;">
-						<i class="terminal icon"></i>
-						<i style="color: #CE3C39;"><strong id="me_console">Disconnected.....</strong></i>
-					</div>
+					
 
 				</header>
 				<div class="mui-content mui-scroll-wrapper">
@@ -230,7 +241,7 @@
 									<div class="mui-input-row">
 										<label id="auto_switch_label" style="width: 60%;"><i class="ui circular inverted teal life ring icon"></i>
 											auto
-											<div class="mui-switch" id="btn_autoFan" style="margin-top: 0;">
+											<div class="mui-switch" id="btn_autoFan" style="margin-top: 0; ">
 												<div class="mui-switch-handle"></div><!-- id="btn_autoFan"不能写在开关内层，应写在外层整体壳上 -->
 											</div>
 										</label>
@@ -244,9 +255,9 @@
 
 									<!-- ------------------------------------------------------------------- -->
 									<!-- 手动模式：风机速度调节设置和监听时间-->
-									<div class=" mui-input-row  neumorphism" id="range_lable" style="margin-top: 8px;">
+									<div class=" mui-input-row  neumorphism" id="range_lable" style="margin-top: 15px, display: block;">
 										<div class="mui-input-row mui-input-range">
-											<input id="fanSpeed_range" style="margin-left: 18px;" type="range" min="0" max="1023" value="0">
+											<input id="fanSpeed_range"  style="margin-left: 18px;" type="range" min="0" max="1023" value="0">
 										</div>
 									</div>
 								</div>
@@ -276,22 +287,45 @@
 							<div class="ui horizontal divider">
 								<i class="ui jsfiddle icon"></i>
 							</div>
-							<div class="ui attached buttons">
-								<button class="ui button">Temp</button>
-								<button class="ui button">RH</button>
-								<button class="ui button">PM2.5</button>
+							
+							<div class="ui basic attached buttons">
+								<button class="ui button">Temp/Hum</button>
 								<button class="ui button">CO2</button>
+								<button class="ui button">Dust</button>
+								<button class="ui button">Air Health</button>
 							</div>
+                            <script type="text/javascript">
+								
+							</script>
+     
 
 
-
-
-							<!---------------------------温度数据显示面板------------------------ -->
+							<!---------------------------温湿度度数据显示面板------------------------ -->
+							<div style = "display:block;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-							<div id="temp_DOM" style="width: 400px;height:400px;"></div>
-
+							    <div id="temp_DOM" style="width: 400px;height:400px;"></div>
+							</div>
 							<!-------------------------------------------------------------- -->
-
+							<!---------------------------CO2数据显示面板------------------------ -->
+							<div style = "display:block;">
+							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+							    <div id="CO2_DOM" style="width: 400px;height:400px;"></div>
+							</div>
+							<!-------------------------------------------------------------- -->
+							<!---------------------------dust数据显示面板------------------------ -->
+							<div style = "display:block;">
+							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+							    <div id="dust_DOM" style="width: 400px;height:400px;"></div>
+							</div>
+							<!-------------------------------------------------------------- -->
+							<!---------------------------fan-speed显示面板------------------------ -->
+							<div style = "display:block;">
+							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+							    <div id="fan_DOM" style="width: 400px;height:400px;"></div>
+							</div>
+							<!-------------------------------------------------------------- -->
+							
+							
 						</div>
 					</div>
 				</div>
@@ -319,6 +353,6 @@
 
 
 
-	</body>
+	</muibody>
 
 </html>
