@@ -8,6 +8,8 @@ var apikey = "6d2ac0601";
 var userID = "U14887";
 var arduinoID = "D21129";
 
+var user_apiID_wechat = "U14887";  //贝壳微信小程序里登录userID,可以模拟Arduino向APP发送实时数据等。（用不同SIGN的Range可以快速模拟温湿度发送指令）
+
 var url = site + ":" + port;
 var json_login = ' {"M":"checkin","ID":"' + ID + '","K":"' + apikey + '"}';
 
@@ -19,6 +21,11 @@ var closeConnection = document.getElementById("closeConnection"); //关闭连接
 
 //会自动在调用的时候，会刷新变量。就不能累次push追加了。所有应该放在全局作用域上
 var Arr_TP_value = [];
+var Arr_hum_value = [];
+var Arr_CO2_value = [];
+var Arr_dust_value = [];
+// var Arr_fan_value = [];
+
 
 
 //脚本监听
@@ -38,7 +45,8 @@ function ConnectAndLoginWebsocket(url) {
 	var ws = new WebSocket(url);
 	ws.onopen = function() {
 		// console.log("Connected!");
-		Check_ws_state(ws); //通信检测
+		// Check_ws_state(ws); //通信检测
+		mui.toast("Connected websocket!");
 
 	};
 
@@ -62,7 +70,10 @@ function ConnectAndLoginWebsocket(url) {
 				/****************检测到登录成功后，连接数据模块***************************/
 				Hand_fanSpeed_range(ws); // 手动滑块控制风机速度模块
 				Hand_Or_Auto(ws); //风机手自动切换模块
-				ShowTemp(ws);
+				
+				//检测数据模块
+				ShowDate_BaseOnEcharts(ws);
+
 
 			} else {
 				SetCirleState_teal();
@@ -138,7 +149,7 @@ function Hand_fanSpeed_range(ws) {
 	fanSpeed_range.addEventListener("touchmove", function() {
 		//向ArduinoID发送动态滑块值
 		//注意不能直接将该条放在监听外面，他会默认等于value的默认值
-		var json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"' + fanSpeed_range.value + '","SIGN":"xx3"}';
+		var json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"' + fanSpeed_range.value + '","SIGN":"fan_speed_hand_range"}';
 		ws.send(json_rangeToSend);
 
 		ws.onmessage = function(evt) {
@@ -153,16 +164,26 @@ function Hand_fanSpeed_range(ws) {
 /**********************************封装风机手自动切换模块***********************/
 function Hand_Or_Auto(ws) {
 	var btn_autoFan = document.getElementById("btn_autoFan");
+	var range_lable = document.getElementById("range_lable");
 	var json_rangeToSend;
 	btn_autoFan.addEventListener("toggle", function(event) {
 		if (event.detail.isActive) {
 			mui.toast("Auto-fan is open!");
 			//向ArduinoID发送"Auto-fan is open!"
-			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"OpenAuto_fan!","SIGN":"xx3"}';
+			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"OpenAuto_fan!","SIGN":"fan_hand_auto"}';
+			
+			//隐藏手动Range
+			range_lable.style.display = "none";
+			
+			
 		} else {
 			mui.toast("Auto-fan is close!");
 			//向ArduinoID发送"Auto-fan is close!"
-			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"CloseAuto_fan!","SIGN":"xx3"}';
+			json_rangeToSend = '{"M":"say","ID":"' + arduinoID + '","C":"CloseAuto_fan!","SIGN":"fan_hand_auto"}';
+			
+			//显示手动Range
+			range_lable.style.display = "block";
+			
 		}
 
 		if (json_rangeToSend) //如果不为空才发送，默认为空
@@ -173,47 +194,80 @@ function Hand_Or_Auto(ws) {
 	});
 }
 
-/*********************************************封装温度模块 ******************************************************/
-function ShowTemp(ws) {
-
+//数据显示
+/*********************************************封装传递参数来显示Echarts的模块 **************************/
+function ShowDate_BaseOnEcharts(ws) {
 	ws.onmessage = function(evt) {
-		var obj = JSON.parse(evt.data); //解析
+
 		me_console.innerText = evt.data;
 		console.log(evt.data);
+				
+        var obj = JSON.parse(evt.data); //解析
 
-		if (obj.M == "say" && obj.ID == arduinoID) //由D21129（Arduino）发过来的
+		if (obj.M == "say" && (obj.ID == arduinoID || obj.ID == user_apiID_wechat))  //由D21129（Arduino）发过来的say，或者微信模拟测试
 		{
-			var Re_TP_value = parseFloat(obj.C); //转换为浮点number
-			console.log(Re_TP_value);
+			//key: obj.SIGN  key:...
+			switch (obj.SIGN) {
+				case "hum":
+					var Re_hum_value = parseFloat(obj.C); //转换为浮点number
+		            Arr_hum_value.push(Re_hum_value);
+					break;
+			    case "temp":
+				    var Re_TP_value = parseFloat(obj.C);
+                    Arr_TP_value.push(Re_TP_value);
+					break;
+			    case "CO2":
+					var Re_CO2_value = parseFloat(obj.C);
+                    Arr_CO2_value.push(Re_CO2_value);
+					break;
+			    case "dust":
+				    var Re_dust_value = parseFloat(obj.C);
+					Arr_dust_value.push(Re_dust_value);
+					break;
+				default:
+				    mui.toast("no any data");
+					break;
+			}	
 		}
 		
-		//叠次push,创建温度数组 
-		Arr_TP_value.push(Re_TP_value);
-		console.log(Arr_TP_value);
-		console.log(typeof(Re_TP_value));
-		// console.log(typeof(Arr_TP_value));	
-
-		//满12个元素后便清空数组,以保证重新push
-		if (Arr_TP_value.length >= 12) {
+	   
+		//满12个元素后便清空数组,以保证重新push下一个12次
+		if (Arr_TP_value.length >= 12) 
+		{
 			Arr_TP_value.splice(0, Arr_TP_value.length);
 		}
-
-		creat_Temp_echarts(Arr_TP_value);
+		else if(Arr_hum_value.length >= 12)
+		{
+		    Arr_hum_value.splice(0,Arr_hum_value.length);
+		}else if(Arr_CO2_value.length >= 12)
+		{
+			Arr_CO2_value.splice(0,Arr_CO2_value.length);
+		}else if(Arr_dust_value.length >= 12)
+		{
+			Arr_dust_value.splice(0,Arr_dust_value.length);
+		}
+		
+		// 调用-绘制Echarts模块"
+		creat_TempHum_echarts(Arr_TP_value,Arr_hum_value);	
+		creat_CO2_echarts(Arr_CO2_value);
+		creat_dust_echarts(Arr_dust_value);
 	}
 }
-/*******************************************绘制温度Echarts**********************************************/
 
-function creat_Temp_echarts(Arr_TP_value) {
+
+//Echarts
+/*******************************************绘制温湿度Echarts模块**********************************************/
+function creat_TempHum_echarts(Arr_TP_value,Arr_hum_value) {
 
 	// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
 
 	var chartDom = document.getElementById('temp_DOM');
 	var myChart = echarts.init(chartDom, 'dark');
-	var option;
+	var option_temp;
 
 	var colors = ['#5470C6', '#EE6666'];
 
-	option = {
+	option_temp = {
 		color: colors,
 		tooltip: {
 			trigger: 'none',
@@ -243,7 +297,7 @@ function creat_Temp_echarts(Arr_TP_value) {
 					label: {
 						formatter: function(params) {
 							return 'value  ' + params.value +
-								(params.seriesData.length ? '：' + params.seriesData[0].data : '');
+								(params.seriesData.length ? '：' + params.seriesData[0].data : '' + "°C");
 						}
 					}
 				},
@@ -264,7 +318,7 @@ function creat_Temp_echarts(Arr_TP_value) {
 					label: {
 						formatter: function(params) {
 							return 'value  ' + params.value +
-								(params.seriesData.length ? '：' + params.seriesData[0].data : '');
+								(params.seriesData.length ? '：' + params.seriesData[0].data : '' + "%");
 						}
 					}
 				},
@@ -282,7 +336,7 @@ function creat_Temp_echarts(Arr_TP_value) {
 				emphasis: {
 					focus: 'series'
 				},
-				data: Arr_TP_value
+				data: Arr_TP_value    //温度数组
 			},
 			{
 				name: 'Humidity',
@@ -291,9 +345,135 @@ function creat_Temp_echarts(Arr_TP_value) {
 				emphasis: {
 					focus: 'series'
 				},
-				data: [3.9, 5.9, 11.1, 18.7, 48.3, 69.2, 231.6, 46.6, 55.4, 18.4, 10.3, 0.7]
+				data: Arr_hum_value  //湿度数值
 			}
 		]
 	};
-	option && myChart.setOption(option);
+	option_temp && myChart.setOption(option_temp);
 }
+
+/*******************************************绘制CO2浓度Echarts模块**********************************************/
+function creat_CO2_echarts(Arr_CO2_value) {
+
+	// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
+
+	var chartDom = document.getElementById('CO2_DOM');
+	var myChart = echarts.init(chartDom, 'dark');
+	var option_CO2;
+
+	var colors = ['#ffaaff'];
+    
+	option_CO2 = {
+		title: {
+			text: 'CO2',
+			subtext: '%'
+		},
+		tooltip: {
+			trigger: 'axis',
+			axisPointer: {
+				type: 'cross'
+			}
+		},
+		toolbox: {
+			show: true,
+			feature: {
+				saveAsImage: {}
+			}
+		},
+		xAxis: {
+			type: 'category',
+			boundaryGap: false,
+			data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		},
+		yAxis: {
+			type: 'value',
+			axisLabel: {
+				formatter: '{value} %'
+			},
+			axisTick: {
+				alignWithLabel: true
+			},
+			axisPointer: {
+				snap: true
+			}
+		},
+		visualMap: {
+			show: false,
+			dimension: 0
+		},
+		series: [
+			{
+				name: 'CO2',
+				type: 'line',
+				smooth: true,
+				data: Arr_CO2_value,
+			}
+		]
+	};
+		
+	option_CO2 && myChart.setOption(option_CO2);
+}
+
+/*******************************************绘制灰尘浓度Echarts模块**********************************************/
+function creat_dust_echarts(Arr_dust_value) {
+
+	// 传入数组并配置index中Temp Echarts,来动态绘制温度变化图
+
+	var chartDom = document.getElementById('dust_DOM');
+	var myChart = echarts.init(chartDom, 'dark');
+	var option_dust;
+	
+	var colors = ['#aa00ff'];
+	
+	option_dust = {
+		title: {
+			text: 'dust',
+			subtext: '%'
+		},
+		tooltip: {
+			trigger: 'axis',
+			axisPointer: {
+				type: 'cross'
+			}
+		},
+		toolbox: {
+			show: true,
+			feature: {
+				saveAsImage: {}
+			}
+		},
+		xAxis: {
+			type: 'category',
+			boundaryGap: false,
+			data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+		},
+		yAxis: {
+			type: 'value',
+			axisLabel: {
+				formatter: '{value} %'
+			},
+			axisTick: {
+				alignWithLabel: true
+			},
+			axisPointer: {
+				snap: true
+			}
+		},
+		visualMap: {
+			show: false,
+			dimension: 0
+		},
+		series: [
+			{
+				name: 'CO2',
+				type: 'line',
+				smooth: true,
+				data: Arr_dust_value
+			}
+		]
+	};
+		
+	option_dust && myChart.setOption(option_dust);
+}
+
+/*******************************************绘制fan speed监听Echarts模块**********************************************/

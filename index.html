@@ -33,7 +33,9 @@
 		<div class="ui top fixed menu">
 			<div class="ui attached inverted segment">
 				<div class="ui buttons">
-					<button class="ui disable button" id="btn_connect"><i class="ui rss icon"></i></button>
+					<button class="ui disable button" id="btn_connect">
+					    <i class="ui rss icon"></i>
+					</button>
 					<div class="or" data-text=">"></div>
 					<button class="ui positive button" id="btn_home">
 						<i class="ui large mixcloud icon"></i>
@@ -46,8 +48,10 @@
 						// 隐藏connect页面,显示Home页面
 						var view01 = document.getElementById("view01");
 						var view02 = document.getElementById("view02");
+						var view_Home_Logo = document.getElementById("view_Home_Logo");
 						view01.style.display = "none";
 						view02.style.display = "block";
+						view_Home_Logo.style.display = "none";
 
 						//禁用Home按钮
 						btn_home.className = " ui disable button";
@@ -62,8 +66,10 @@
 						// 显示connect页面,隐藏Home页面
 						var view01 = document.getElementById("view01");
 						var view02 = document.getElementById("view02");
+						var view_Home_Logo = document.getElementById("view_Home_Logo");
 						view01.style.display = "block";
 						view02.style.display = "none";
+						view_Home_Logo.style.display = "none";
 
 						//开启Home按钮
 						btn_home.className = " ui positive button";
@@ -85,7 +91,7 @@
 			<br>
 		</div>
 		<!-- ------------------------------------------------------------- -->
-
+         
 		<!-- 侧滑导航根容器 -->
 		<div class="mui-off-canvas-wrap mui-draggable">
 			<!-- 菜单容器 -->
@@ -152,24 +158,22 @@
 					</div>
 				</div>
 			</aside>
-
-
 			<!-- 主页面容器 -->
 			<div class="mui-inner-wrap">
 				<!-- 主页面标题 -->
 				<header class="mui-bar mui-bar-nav">
 					<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>
-
-					
-
 				</header>
 				<div class="mui-content mui-scroll-wrapper">
 					<div class="mui-scroll">
 
 						<!-- 主界面 -->
+						<!-- view_Home_Logo --> 
+				        <img class="mui-image" id ="view_Home_Logo" style= "margin-left: 33%; margin-top: 50%;" src="icon2021newVer128.png">
+						
 						<!-- view01 -->
 						<!-- -------------------------------------------------------------------- -->
-						<div class="ui container" id="view01">
+						<div class="ui container" id="view01" style="display: none;">
 							<!-- 容器-连接页面-->
 							<!-- <div class="ui container"> -->
 							<div class="ui placeholder segment">
@@ -235,7 +239,7 @@
 
 						<div id="view02" style="display:none;">
 							<!-- ----------------------------------Fan------------------------------- -->
-							<div id="fan_view" class="ui container" style="margin-top: 10px;">
+							<div id="fan_controller_plane" class="ui container" style="margin-top: 10px;">
 								<!--Open or Close “auto fan” -->
 								<div class="neumorphism" style=" width: 100%; ">
 									<div class="mui-input-row">
@@ -283,47 +287,93 @@
 
 
 
-							<!-- 数据选项 -->
+<!-- 数据选项 按钮块-->
 							<div class="ui horizontal divider">
 								<i class="ui jsfiddle icon"></i>
 							</div>
 							
 							<div class="ui basic attached buttons">
-								<button class="ui button">Temp/Hum</button>
-								<button class="ui button">CO2</button>
-								<button class="ui button">Dust</button>
-								<button class="ui button">Air Health</button>
+								<button class="ui button" id= "btn_tempShow" >Temp/Hum</button>
+								<button class="ui button" id= "btn_CO2Show">CO2</button>
+								<button class="ui button" id= "btn_dustShow">Dust</button>
+								<button class="ui button" id= "btn_fanShow">Fan</button>
 							</div>
-                            <script type="text/javascript">
-								
-							</script>
+							
+                            
      
 
-
+<!-- 
+------四大数据面板
+ -->
 							<!---------------------------温湿度度数据显示面板------------------------ -->
-							<div style = "display:block;">
+							<div id="temp_view" style = "display:block;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="temp_DOM" style="width: 400px;height:400px;"></div>
 							</div>
 							<!-------------------------------------------------------------- -->
 							<!---------------------------CO2数据显示面板------------------------ -->
-							<div style = "display:block;">
+							<div id="CO2_view" style = "display:block;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="CO2_DOM" style="width: 400px;height:400px;"></div>
 							</div>
 							<!-------------------------------------------------------------- -->
 							<!---------------------------dust数据显示面板------------------------ -->
-							<div style = "display:block;">
+							<div id="dust_view" style = "display:none;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="dust_DOM" style="width: 400px;height:400px;"></div>
+								Dust
 							</div>
 							<!-------------------------------------------------------------- -->
 							<!---------------------------fan-speed显示面板------------------------ -->
-							<div style = "display:block;">
+							<div id="fan_view" style = "display:none;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="fan_DOM" style="width: 400px;height:400px;"></div>
+								fast
 							</div>
 							<!-------------------------------------------------------------- -->
+
+							<script type="text/javascript">
+								var btn_tempShow = document.getElementById("btn_tempShow");
+								var btn_CO2Show = document.getElementById("btn_CO2Show");
+								var btn_dustShow = document.getElementById("btn_dustShow");
+								var btn_fanShow = document.getElementById("btn_fanShow");
+								
+								var temp_view = document.getElementById("temp_view");
+								var CO2_view = document.getElementById("CO2_view");
+								var dust_view = document.getElementById("dust_view");
+								var fan_view = document.getElementById("fan_view");
+								
+								btn_tempShow.addEventListener("click",function()
+								{
+									temp_view.style.display = "block";
+									CO2_view.style.display = "none";
+									dust_view.style.display = "none";
+									fan_view.style.display ="none";
+								});
+								btn_CO2Show.addEventListener("click",function()
+								{
+									CO2_view.style.display = "block";
+									temp_view.style.display = "none";
+									dust_view.style.display = "none";
+									fan_view.style.display ="none";
+								});
+								btn_dustShow.addEventListener("click",function()
+								{
+									dust_view.style.display = "block";
+									CO2_view.style.display = "none";
+									temp_view.style.display = "none";
+									fan_view.style.display ="none";
+								});
+								btn_fanShow.addEventListener("click",function()
+								{
+							        fan_view.style.display = "block";
+									CO2_view.style.display = "none";
+									dust_view.style.display = "none";
+									temp_view.style.display ="none";
+								});   
+							</script>
+							
+							
 							
 							
 						</div>
@@ -331,6 +381,8 @@
 				</div>
 			</div>
 		</div>
+		
+		
 
 		<!-----------------------scripts---------------------------------------->
 		<script src="./js/quick_websocket.js"></script>
