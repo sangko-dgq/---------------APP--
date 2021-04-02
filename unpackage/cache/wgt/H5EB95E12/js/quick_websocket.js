@@ -361,7 +361,7 @@ function creat_CO2_echarts(Arr_CO2_value) {
 	var myChart = echarts.init(chartDom, 'dark');
 	var option_CO2;
 
-	var colors = ['#ffaaff'];
+	var colors = ['#ff00ff'];
     
 	option_CO2 = {
 		title: {
@@ -397,10 +397,6 @@ function creat_CO2_echarts(Arr_CO2_value) {
 				snap: true
 			}
 		},
-		visualMap: {
-			show: false,
-			dimension: 0
-		},
 		series: [
 			{
 				name: 'CO2',
@@ -427,7 +423,7 @@ function creat_dust_echarts(Arr_dust_value) {
 	
 	option_dust = {
 		title: {
-			text: 'dust',
+			text: 'Dust',
 			subtext: '%'
 		},
 		tooltip: {

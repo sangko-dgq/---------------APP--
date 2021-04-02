@@ -1,7 +1,10 @@
 //主要负责  ： QuickConnect的功能
 
 var site = "ws://www.bigiot.net";
+// var site = "192.168.43.212"
 var port = "8383";
+// var port = "9000";
+
 var ID = "20959";
 var apikey = "6d2ac0601";
 
@@ -64,6 +67,15 @@ function ConnectAndLoginWebsocket(url) {
 			if (evt.data = {
 					"M": "checked"
 				}) {
+					//每隔5s发送心跳包以保持登录
+				setInterval(function()
+				{
+				    ws.send(json_login);
+					// mui.toast("beat!")
+				},5000);
+
+
+					
 				SetCirleState_teal();
 				HideC_ShowHome()
 
@@ -361,7 +373,7 @@ function creat_CO2_echarts(Arr_CO2_value) {
 	var myChart = echarts.init(chartDom, 'dark');
 	var option_CO2;
 
-	var colors = ['#ffaaff'];
+	var colors = ['#ff00ff'];
     
 	option_CO2 = {
 		title: {
@@ -397,10 +409,6 @@ function creat_CO2_echarts(Arr_CO2_value) {
 				snap: true
 			}
 		},
-		visualMap: {
-			show: false,
-			dimension: 0
-		},
 		series: [
 			{
 				name: 'CO2',
@@ -427,7 +435,7 @@ function creat_dust_echarts(Arr_dust_value) {
 	
 	option_dust = {
 		title: {
-			text: 'dust',
+			text: 'Dust',
 			subtext: '%'
 		},
 		tooltip: {

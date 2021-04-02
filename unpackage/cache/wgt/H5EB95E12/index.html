@@ -169,7 +169,7 @@
 
 						<!-- 主界面 -->
 						<!-- view_Home_Logo --> 
-				        <img class="mui-image" id ="view_Home_Logo" style= "margin-left: 33%; margin-top: 50%;" src="icon2021newVer128.png">
+				        <img class="mui-image" id ="view_Home_Logo" style= "margin-left: 35%; margin-top: 50%;" src="icon2021newVer128.png">
 						
 						<!-- view01 -->
 						<!-- -------------------------------------------------------------------- -->
@@ -304,7 +304,7 @@
 
 <!-- 
 ------四大数据面板
- -->
+ -->     
 							<!---------------------------温湿度度数据显示面板------------------------ -->
 							<div id="temp_view" style = "display:block;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
@@ -312,7 +312,7 @@
 							</div>
 							<!-------------------------------------------------------------- -->
 							<!---------------------------CO2数据显示面板------------------------ -->
-							<div id="CO2_view" style = "display:block;">
+							<div id="CO2_view" style = "display:none;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="CO2_DOM" style="width: 400px;height:400px;"></div>
 							</div>
@@ -321,15 +321,14 @@
 							<div id="dust_view" style = "display:none;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="dust_DOM" style="width: 400px;height:400px;"></div>
-								Dust
 							</div>
 							<!-------------------------------------------------------------- -->
 							<!---------------------------fan-speed显示面板------------------------ -->
 							<div id="fan_view" style = "display:none;">
 							<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 							    <div id="fan_DOM" style="width: 400px;height:400px;"></div>
-								fast
 							</div>
+					
 							<!-------------------------------------------------------------- -->
 
 							<script type="text/javascript">
