@@ -1,7 +1,10 @@
 //主要负责  ： QuickConnect的功能
 
 var site = "ws://www.bigiot.net";
+// var site = "192.168.43.212"
 var port = "8383";
+// var port = "9000";
+
 var ID = "20959";
 var apikey = "6d2ac0601";
 
@@ -64,6 +67,15 @@ function ConnectAndLoginWebsocket(url) {
 			if (evt.data = {
 					"M": "checked"
 				}) {
+					//每隔5s发送心跳包以保持登录
+				setInterval(function()
+				{
+				    ws.send(json_login);
+					// mui.toast("beat!")
+				},5000);
+
+
+					
 				SetCirleState_teal();
 				HideC_ShowHome()
 
@@ -216,7 +228,7 @@ function ShowDate_BaseOnEcharts(ws) {
 				    var Re_TP_value = parseFloat(obj.C);
                     Arr_TP_value.push(Re_TP_value);
 					break;
-			    case "CO2":
+			    case "ppm":
 					var Re_CO2_value = parseFloat(obj.C);
                     Arr_CO2_value.push(Re_CO2_value);
 					break;
@@ -264,11 +276,47 @@ function creat_TempHum_echarts(Arr_TP_value,Arr_hum_value) {
 	var chartDom = document.getElementById('temp_DOM');
 	var myChart = echarts.init(chartDom, 'dark');
 	var option_temp;
-
-	var colors = ['#5470C6', '#EE6666'];
+	var hum_color = '#72bcfc';
+	var temp_color = "#ef8834";
+	var colors = [temp_color, hum_color];
+	
+	for(var i = 0; i < Arr_hum_value.length; i++)
+	{
+		if(Arr_hum_value[i] >= 80 || Arr_hum_value[i] <= 35)
+		{
+			hum_color = '#33b9b0';
+			colors = [temp_color, hum_color];
+		}
+		else
+		{
+			hum_color = '#68dcfc';
+			colors = [temp_color, hum_color];
+		}
+		
+	}
+	
+	for(var i = 0; i < Arr_TP_value.length; i++)
+	{
+		if(Arr_TP_value[i] >= 25 || Arr_TP_value[i] <= 15)
+		{
+			temp_color = "#ef4911";
+			colors = [temp_color, hum_color];
+		}
+		else
+		{
+			temp_color = "#efaa3a";
+			colors = [temp_color, hum_color];
+		}
+	}
+    
+    
 
 	option_temp = {
 		color: colors,
+		title: {
+			text: '°C - %',
+			// subtext: ''
+		},
 		tooltip: {
 			trigger: 'none',
 			axisPointer: {
@@ -361,12 +409,13 @@ function creat_CO2_echarts(Arr_CO2_value) {
 	var myChart = echarts.init(chartDom, 'dark');
 	var option_CO2;
 
-	var colors = ['#ff00ff'];
+	var colors = ['#aaaaff'];
     
 	option_CO2 = {
+		color: colors,
 		title: {
-			text: 'CO2',
-			subtext: '%'
+			text: 'AirPPM',
+			// subtext: ''
 		},
 		tooltip: {
 			trigger: 'axis',
@@ -388,7 +437,7 @@ function creat_CO2_echarts(Arr_CO2_value) {
 		yAxis: {
 			type: 'value',
 			axisLabel: {
-				formatter: '{value} %'
+				formatter: '{value}'
 			},
 			axisTick: {
 				alignWithLabel: true
@@ -399,7 +448,7 @@ function creat_CO2_echarts(Arr_CO2_value) {
 		},
 		series: [
 			{
-				name: 'CO2',
+				name: 'AirPPM',
 				type: 'line',
 				smooth: true,
 				data: Arr_CO2_value,

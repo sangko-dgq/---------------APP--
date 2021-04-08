@@ -409,7 +409,7 @@ function creat_CO2_echarts(Arr_CO2_value) {
 	var myChart = echarts.init(chartDom, 'dark');
 	var option_CO2;
 
-	var colors = ['#00aa7f'];
+	var colors = ['#aaaaff'];
     
 	option_CO2 = {
 		color: colors,
