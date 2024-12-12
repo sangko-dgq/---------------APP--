@@ -1,6 +1,8 @@
 # Cloud Data Acquisition and Control App  
-基于 WebSocket 的云端数据采集与控制 APP  
+基于 WebSocket 的云端数据采集与控制 移动端APP  
 （该仓库仅作早期测试使用。）
+
+![image](https://github.com/user-attachments/assets/41d53f82-a7f0-4987-88a0-69b8328833af)
 
 ## 技术栈  
 - **APP 框架**：uni-app + MUI + Semantic-UI  
